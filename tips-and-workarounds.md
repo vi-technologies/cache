@@ -12,12 +12,13 @@ A cache today is immutable and cannot be updated. But some use cases require the
 
   ```yaml
       - name: update cache on every commit
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: prime-numbers
           key: primes-${{ runner.os }}-${{ github.run_id }} # Can use time based key as well
           restore-keys: |
             primes-${{ runner.os }}
+          bucketName: my-bucket
   ```
 
   Please note that this will create a new cache on every run and hence will consume the cache [quota](./README.md#cache-limits).
@@ -61,7 +62,7 @@ jobs:
       contents: read
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Cleanup
         run: |

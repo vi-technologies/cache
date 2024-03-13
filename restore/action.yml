@@ -8,6 +8,9 @@ inputs:
   key:
     description: 'An explicit key for restoring the cache'
     required: true
+  bucketName:
+    description: 'The name of the cache bucket to use for caching'
+    required: true 
   restore-keys:
     description: 'An ordered list of keys to use for restoring stale cache if no cache hit occurred for key. Note `cache-hit` returns false in this case.'
     required: false

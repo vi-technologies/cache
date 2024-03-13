@@ -1,9 +1,9 @@
-import * as cache from "@actions/cache";
 import * as core from "@actions/core";
 
 import { Events, Inputs, RefKey } from "../src/constants";
 import { saveRun } from "../src/saveImpl";
 import * as actionUtils from "../src/utils/actionUtils";
+import * as cacheUtils from "../src/utils/cacheUtils";
 import * as testUtils from "../src/utils/testUtils";
 
 jest.mock("@actions/core");
@@ -78,6 +78,7 @@ test("save with valid inputs uploads a cache", async () => {
 
     const primaryKey = "Linux-node-bb828da54c148048dd17899ba9fda624811cfb43";
     const savedCacheKey = "Linux-node-";
+    const bucketName = "my-bucket";
 
     jest.spyOn(core, "getState")
         // Cache Entry State
@@ -91,11 +92,11 @@ test("save with valid inputs uploads a cache", async () => {
 
     const inputPath = "node_modules";
     testUtils.setInput(Inputs.Path, inputPath);
-    testUtils.setInput(Inputs.UploadChunkSize, "4000000");
+    testUtils.setInput(Inputs.BucketName, bucketName);
 
     const cacheId = 4;
     const saveCacheMock = jest
-        .spyOn(cache, "saveCache")
+        .spyOn(cacheUtils, "saveCache")
         .mockImplementationOnce(() => {
             return Promise.resolve(cacheId);
         });
@@ -106,10 +107,7 @@ test("save with valid inputs uploads a cache", async () => {
     expect(saveCacheMock).toHaveBeenCalledWith(
         [inputPath],
         primaryKey,
-        {
-            uploadChunkSize: 4000000
-        },
-        false
+        bucketName
     );
 
     expect(failedMock).toHaveBeenCalledTimes(0);

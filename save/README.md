@@ -9,6 +9,7 @@ The save action saves a cache. It works similarly to the `cache` action except t
 * `key` - An explicit key for a cache entry. See [creating a cache key](../README.md#creating-a-cache-key).
 * `path` - A list of files, directories, and wildcard patterns to cache. See [`@actions/glob`](https://github.com/actions/toolkit/tree/main/packages/glob) for supported patterns.
 * `upload-chunk-size` - The chunk size used to split up large files during upload, in bytes
+* `bucketName` - The name of the cache bucket to use for caching.
 
 ### Outputs
 
@@ -23,7 +24,7 @@ If you are using separate jobs for generating common artifacts and sharing them 
 
 ```yaml
 steps:
-  - uses: actions/checkout@v3
+  - uses: actions/checkout@v4
 
   - name: Install Dependencies
     run: /install.sh
@@ -31,11 +32,12 @@ steps:
   - name: Build artifacts
     run: /build.sh
 
-  - uses: actions/cache/save@v3
+  - uses: actions/cache/save@v4
     id: cache
     with:
       path: path/to/dependencies
       key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+      bucketName: my-bucket
 ```
 
 ### Re-evaluate cache key while saving
@@ -47,25 +49,28 @@ Let's say we have a restore step that computes a key at runtime.
 #### Restore a cache
 
 ```yaml
-uses: actions/cache/restore@v3
+uses: actions/cache/restore@v4
 id: restore-cache
 with:
     key: cache-${{ hashFiles('**/lockfiles') }}
+    bucketName: my-bucket
 ```
 
 #### Case 1 - Where a user would want to reuse the key as it is
 ```yaml
-uses: actions/cache/save@v3
+uses: actions/cache/save@v4
 with:
     key: ${{ steps.restore-cache.outputs.cache-primary-key }}
+    bucketName: my-bucket
 ```
 
 #### Case 2 - Where the user would want to re-evaluate the key
 
 ```yaml
-uses: actions/cache/save@v3
+uses: actions/cache/save@v4
 with:
     key: npm-cache-${{hashfiles(package-lock.json)}}
+    bucketName: my-bucket
 ```
 
 ### Always save cache
@@ -74,15 +79,16 @@ There are instances where some flaky test cases would fail the entire workflow a
 
 ```yaml
 steps:
-  - uses: actions/checkout@v3
+  - uses: actions/checkout@v4
   .
   . // restore if need be
   .
   - name: Build
     run: /build.sh
-  - uses: actions/cache/save@v3
+  - uses: actions/cache/save@v4
     if: always() // or any other condition to invoke the save action
     with:
       path: path/to/dependencies
       key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+      bucketName: my-bucket
 ```
