@@ -8,6 +8,9 @@ inputs:
   key:
     description: 'An explicit key for saving the cache'
     required: true
+  bucketName:
+    description: 'The name of the cache bucket to use for caching'
+    required: true 
   upload-chunk-size:
     description: 'The chunk size used to split up large files during upload, in bytes'
     required: false

@@ -1,9 +1,9 @@
-import * as cache from "@actions/cache";
 import * as core from "@actions/core";
 
 import { Events, Inputs, RefKey } from "../src/constants";
 import { saveOnlyRun } from "../src/saveImpl";
 import * as actionUtils from "../src/utils/actionUtils";
+import * as cacheUtils from "../src/utils/cacheUtils";
 import * as testUtils from "../src/utils/testUtils";
 
 jest.mock("@actions/core");
@@ -77,15 +77,16 @@ test("save with valid inputs uploads a cache", async () => {
     const failedMock = jest.spyOn(core, "setFailed");
 
     const primaryKey = "Linux-node-bb828da54c148048dd17899ba9fda624811cfb43";
-
     const inputPath = "node_modules";
+    const bucketName = "my-bucket";
+
     testUtils.setInput(Inputs.Key, primaryKey);
     testUtils.setInput(Inputs.Path, inputPath);
-    testUtils.setInput(Inputs.UploadChunkSize, "4000000");
+    testUtils.setInput(Inputs.BucketName, bucketName);
 
     const cacheId = 4;
     const saveCacheMock = jest
-        .spyOn(cache, "saveCache")
+        .spyOn(cacheUtils, "saveCache")
         .mockImplementationOnce(() => {
             return Promise.resolve(cacheId);
         });
@@ -96,10 +97,7 @@ test("save with valid inputs uploads a cache", async () => {
     expect(saveCacheMock).toHaveBeenCalledWith(
         [inputPath],
         primaryKey,
-        {
-            uploadChunkSize: 4000000
-        },
-        false
+        bucketName
     );
 
     expect(failedMock).toHaveBeenCalledTimes(0);
@@ -109,15 +107,16 @@ test("save failing logs the warning message", async () => {
     const warningMock = jest.spyOn(core, "warning");
 
     const primaryKey = "Linux-node-bb828da54c148048dd17899ba9fda624811cfb43";
-
     const inputPath = "node_modules";
+    const bucketName = "my-bucket";
+
     testUtils.setInput(Inputs.Key, primaryKey);
     testUtils.setInput(Inputs.Path, inputPath);
-    testUtils.setInput(Inputs.UploadChunkSize, "4000000");
+    testUtils.setInput(Inputs.BucketName, bucketName);
 
     const cacheId = -1;
     const saveCacheMock = jest
-        .spyOn(cache, "saveCache")
+        .spyOn(cacheUtils, "saveCache")
         .mockImplementationOnce(() => {
             return Promise.resolve(cacheId);
         });
@@ -128,10 +127,7 @@ test("save failing logs the warning message", async () => {
     expect(saveCacheMock).toHaveBeenCalledWith(
         [inputPath],
         primaryKey,
-        {
-            uploadChunkSize: 4000000
-        },
-        false
+        bucketName
     );
 
     expect(warningMock).toHaveBeenCalledTimes(1);

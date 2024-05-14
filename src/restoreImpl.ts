@@ -8,6 +8,10 @@ import {
     StateProvider
 } from "./stateProvider";
 import * as utils from "./utils/actionUtils";
+import * as cacheUtils from "./utils/cacheUtils";
+
+const bucketName = core.getInput(Inputs.BucketName, { required: true });
+const canRestoreFromS3 = bucketName !== undefined;
 
 export async function restoreImpl(
     stateProvider: IStateProvider
@@ -41,13 +45,28 @@ export async function restoreImpl(
         const failOnCacheMiss = utils.getInputAsBool(Inputs.FailOnCacheMiss);
         const lookupOnly = utils.getInputAsBool(Inputs.LookupOnly);
 
-        const cacheKey = await cache.restoreCache(
-            cachePaths,
-            primaryKey,
-            restoreKeys,
-            { lookupOnly: lookupOnly },
-            enableCrossOsArchive
-        );
+        let cacheKey: string | undefined;
+
+        if (canRestoreFromS3) {
+            core.info(
+                "The cache action detected a local S3 bucket cache. Using it."
+            );
+            cacheKey = await cacheUtils.restoreCache(
+                bucketName,
+                cachePaths,
+                primaryKey,
+                restoreKeys,
+                { lookupOnly }
+            );
+        } else {
+            cacheKey = await cache.restoreCache(
+                cachePaths,
+                primaryKey,
+                restoreKeys,
+                { lookupOnly },
+                enableCrossOsArchive
+            );
+        }
 
         if (!cacheKey) {
             if (failOnCacheMiss) {

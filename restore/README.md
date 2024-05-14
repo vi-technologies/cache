@@ -11,6 +11,7 @@ The restore action restores a cache. It works similarly to the `cache` action ex
 * `restore-keys` - An ordered list of prefix-matched keys to use for restoring stale cache if no cache hit occurred for key.
 * `fail-on-cache-miss` - Fail the workflow if cache entry is not found. Default: `false`
 * `lookup-only` - If true, only checks if cache entry exists and skips download. Default: `false`
+* `bucketName` - The name of the cache bucket to use for caching.
 
 ### Outputs
 
@@ -35,13 +36,14 @@ If you are using separate jobs to create and save your cache(s) to be reused by 
 
 ```yaml
 steps:
-  - uses: actions/checkout@v3
+  - uses: actions/checkout@v4
 
-  - uses: actions/cache/restore@v3
+  - uses: actions/cache/restore@v4
     id: cache
     with:
       path: path/to/dependencies
       key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+      bucketName: my-bucket
 
   - name: Install Dependencies
     if: steps.cache.outputs.cache-hit != 'true'
@@ -64,29 +66,31 @@ In case of multi-module projects, where the built artifact of one project needs 
 
 ```yaml
 steps:
-  - uses: actions/checkout@v3
+  - uses: actions/checkout@v4
 
   - name: Build
     run: /build-parent-module.sh
 
-  - uses: actions/cache/save@v3
+  - uses: actions/cache/save@v4
     id: cache
     with:
       path: path/to/dependencies
       key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+      bucketName: my-bucket
 ```
 
 #### Step 2 - Restore the built artifact from cache using the same key and path
 
 ```yaml
 steps:
-  - uses: actions/checkout@v3
+  - uses: actions/checkout@v4
 
-  - uses: actions/cache/restore@v3
+  - uses: actions/cache/restore@v4
     id: cache
     with:
       path: path/to/dependencies
       key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+      bucketName: my-bucket
 
   - name: Install Dependencies
     if: steps.cache.outputs.cache-hit != 'true'
@@ -107,13 +111,14 @@ To fail if there is no cache hit for the primary key, leave `restore-keys` empty
 
 ```yaml
 steps:
-  - uses: actions/checkout@v3
+  - uses: actions/checkout@v4
 
-  - uses: actions/cache/restore@v3
+  - uses: actions/cache/restore@v4
     id: cache
     with:
       path: path/to/dependencies
       key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+      bucketName: my-bucket
       fail-on-cache-miss: true
 
   - name: Build

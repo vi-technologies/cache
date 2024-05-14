@@ -16,6 +16,7 @@ interface CacheInput {
     enableCrossOsArchive?: boolean;
     failOnCacheMiss?: boolean;
     lookupOnly?: boolean;
+    bucketName: string;
 }
 
 export function setInputs(input: CacheInput): void {
@@ -32,6 +33,7 @@ export function setInputs(input: CacheInput): void {
         setInput(Inputs.FailOnCacheMiss, input.failOnCacheMiss.toString());
     input.lookupOnly !== undefined &&
         setInput(Inputs.LookupOnly, input.lookupOnly.toString());
+    input.bucketName && setInput(Inputs.BucketName, input.bucketName);
 }
 
 export function clearInputs(): void {
@@ -42,4 +44,5 @@ export function clearInputs(): void {
     delete process.env[getInputName(Inputs.EnableCrossOsArchive)];
     delete process.env[getInputName(Inputs.FailOnCacheMiss)];
     delete process.env[getInputName(Inputs.LookupOnly)];
+    delete process.env[getInputName(Inputs.BucketName)];
 }
